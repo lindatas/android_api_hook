@@ -2,6 +2,8 @@ package com.example.myapplication1;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -38,14 +40,13 @@ public class MainActivity extends AppCompatActivity {
 //        TelephonyManager telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
 
 
-
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast toast = Toast.makeText(MainActivity.this,"跳转按钮被点击了",Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(MainActivity.this, "跳转按钮被点击了", Toast.LENGTH_SHORT);
                 toast.show();
                 Intent intent = new Intent();
-                intent.setClass(MainActivity.this,showActivity.class);
+                intent.setClass(MainActivity.this, showActivity.class);
                 startActivity(intent);
             }
         });
@@ -57,16 +58,16 @@ public class MainActivity extends AppCompatActivity {
 
 
         final TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_PHONE_STATE},1);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, 1);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            Toast toast = Toast.makeText(this,"权限申请失败",Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(this, "权限申请失败", Toast.LENGTH_SHORT);
             toast.show();
             return;
         }
         btn2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                text1.setText(txt1 + getImei(mcontext,telephonyManager));
+                text1.setText(txt1 + getImei(mcontext, telephonyManager));
 //                text1.setText(txt1);
             }
         });
@@ -74,7 +75,8 @@ public class MainActivity extends AppCompatActivity {
         btn3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                text1.setText(txt2 + getPhoneNo(mcontext,telephonyManager));
+//                text1.setText(txt2 + getPhoneNo(mcontext, telephonyManager));
+                text1.setText(txt2 + getClipboard(mcontext));
             }
         });
     }
@@ -84,24 +86,24 @@ public class MainActivity extends AppCompatActivity {
 
 
         String Imei = telephonyManager.getImei();
-        Log.e("IMEI:",Imei);
-        if (Imei.isEmpty()){
-            Toast toast = Toast.makeText(MainActivity.this,"Imei() 获取失败",Toast.LENGTH_SHORT);
+        Log.e("IMEI:", Imei);
+        if (Imei.isEmpty()) {
+            Toast toast = Toast.makeText(MainActivity.this, "Imei() 获取失败", Toast.LENGTH_SHORT);
             toast.show();
-        }else {
-            Toast toast = Toast.makeText(MainActivity.this,"Imei() 获取成功",Toast.LENGTH_SHORT);
+        } else {
+            Toast toast = Toast.makeText(MainActivity.this, "Imei() 获取成功", Toast.LENGTH_SHORT);
             toast.show();
             return Imei;
         }
 
         Imei = telephonyManager.getDeviceId();
-        Log.e("IMEI:",Imei);
-        if (Imei.isEmpty()){
-            Toast toast = Toast.makeText(MainActivity.this,"DeviceId() 获取失败",Toast.LENGTH_SHORT);
+        Log.e("IMEI:", Imei);
+        if (Imei.isEmpty()) {
+            Toast toast = Toast.makeText(MainActivity.this, "DeviceId() 获取失败", Toast.LENGTH_SHORT);
             toast.show();
-        }else {
+        } else {
 
-            Toast toast = Toast.makeText(MainActivity.this,"DeviceId() 获取成功",Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(MainActivity.this, "DeviceId() 获取成功", Toast.LENGTH_SHORT);
             toast.show();
             return Imei;
         }
@@ -109,6 +111,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String getPhoneNo(Context context, TelephonyManager telephonyManager) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_NUMBERS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return "";
+        }
         String number = telephonyManager.getLine1Number();
         Log.e("Number:",number);
         if (number.isEmpty()){
@@ -124,4 +136,22 @@ public class MainActivity extends AppCompatActivity {
 
         return "";
     }
+
+     public String getClipboard(Context context){
+        String content = null;
+        Log.v("Main","clip");
+         ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+         try{
+             ClipData data = cm.getPrimaryClip();
+             ClipData.Item item = data.getItemAt(0);
+             content = item.getText().toString();
+
+         }catch (Exception e){
+             e.printStackTrace();
+         }
+         Toast toast = Toast.makeText(MainActivity.this,content,Toast.LENGTH_SHORT);
+         toast.show();
+         return content;
+     }
+
 }
